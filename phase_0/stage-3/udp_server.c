@@ -60,7 +60,12 @@ int main()
     server_addr.sin_addr.s_addr = INADDR_ANY; // Any incoming interface
     server_addr.sin_port = htons(SERVER_PORT);     // Server port
 
-    bind(listen_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    if(bind(listen_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+    {
+        printf("[ERROR] Failed to bind socket to port %d\n", SERVER_PORT);
+        close(listen_sockfd);
+        exit(1);
+    }
     while(1)
     {
         memset(buffer, 0, BUFF_SIZE);

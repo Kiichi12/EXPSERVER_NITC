@@ -39,7 +39,8 @@ int main() {
     server_addr.sin_port = htons(PORT);
 
     // Binding listening sock to port
-    if (bind(listen_sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+    if (bind(listen_sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) 
+    {
         printf("[ERROR] Failed to bind socket to port %d\n", PORT);
         close(listen_sock_fd);
         exit(1);

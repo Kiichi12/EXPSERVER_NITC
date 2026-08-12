@@ -39,13 +39,11 @@ bool isClientConnFd(int fd) {
 }
 
 int create_loop() {
-    /* return new epoll instance */
     int epoll_fd = epoll_create1(0);
     return epoll_fd;
 }
 
 void loop_attach(int epoll_fd, int fd, int eventFlag) {
-    /* attach fd to epoll */
     struct epoll_event event;
     event.events = eventFlag;
     event.data.fd = fd;
@@ -53,7 +51,6 @@ void loop_attach(int epoll_fd, int fd, int eventFlag) {
 }
 
 int create_server() {
-    /* create listening socket and return it */
     listen_sock_fd = socket(AF_INET, SOCK_STREAM, 0);
 
     // Setting sock opt reuse addr
@@ -79,10 +76,11 @@ int create_server() {
 
 int connect_upstream() {
 
-  int upstream_sock_fd = socket(AF_INET, SOCK_STREAM, 0); /* create a upstrem socket */
+  int upstream_sock_fd = socket(AF_INET, SOCK_STREAM, 0);
 
   struct sockaddr_in upstream_addr;
-  /* add upstream server details */
+
+  // Add upstream server details
   upstream_addr.sin_family = AF_INET;
   upstream_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
   upstream_addr.sin_port = htons(UPSTREAM_PORT);
@@ -105,16 +103,16 @@ void accept_connection() {
   printf("[INFO] Client connected from %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
   
 
-  /* add conn_sock_fd to loop using loop_attach() */
+  // Add conn_sock_fd to epoll loop
   loop_attach(epoll_fd, conn_sock_fd, EPOLLIN);
 
-  // create connection to upstream server
+  // Create connection to upstream server
   int upstream_sock_fd = connect_upstream();
 
-  /* add upstream_sock_fd to loop using loop_attach() */
+  // Add upstream_sock_fd to epoll loop
   loop_attach(epoll_fd, upstream_sock_fd, EPOLLIN);
 
-  // add conn_sock_fd and upstream_sock_fd to routing table
+  // Add conn_sock_fd and upstream_sock_fd to routing table
   route_table[route_table_size][0] = conn_sock_fd;
   route_table[route_table_size][1] = upstream_sock_fd;
   route_table_size += 1;
@@ -144,7 +142,7 @@ void handle_client(int conn_sock_fd) {
     printf("[CLIENT MESSAGE] %s", buff);
 
 
-    /* find the right upstream socket from the route table */
+    // Find the right upstream socket from the route table
     int upstream_sock_fd = -1;
     for(int i = 0; i < route_table_size; i++) {
         if (route_table[i][0] == conn_sock_fd) {
@@ -154,7 +152,7 @@ void handle_client(int conn_sock_fd) {
         }
     }
 
-    // sending client message to upstream
+    // Send client message to upstream
     int bytes_written = 0;
     int message_len = read_n;
     while (bytes_written < message_len) {
@@ -187,16 +185,17 @@ void handle_upstream(int upstream_sock_fd) {
     // Print message from client
     printf("[CLIENT MESSAGE IN UPSTREAM] %s", buff);
 
+    // Find the corresponding client socket
     int client_conn_fd = -1;
     for(int i = 0; i < route_table_size; i++) {
         if (route_table[i][1] == upstream_sock_fd) {
-            // found the upstream socket
+            // found the client socket
             client_conn_fd = route_table[i][0];
             break;
         }
     }
 
-    // Send reversed string back to client
+    // Send message back to client
     send(client_conn_fd, buff, read_n, 0);
 }
 
@@ -230,10 +229,10 @@ int main() {
 
     epoll_fd = create_loop();
 
-    /* attach server to event loop using loop_attach() */
+    // Attach server to event loop
     loop_attach(epoll_fd, listen_sock_fd, EPOLLIN);
 
-    /* start event loop with loop_run() */
+    // Start event loop
     loop_run(epoll_fd);
 
 }
