@@ -138,18 +138,18 @@ void listener_connection_handler(void *ptr) {
     return;
   }
 
-  // Set the new connection socket to non-blocking
-    int flags = fcntl(conn_sock_fd, F_GETFL, 0);
-    if (flags < 0) {
-      logger(LOG_ERROR, "listener_connection_handler()", "fcntl F_GETFL failed");
-      close(conn_sock_fd);
-      return;
-    }
-    if (fcntl(conn_sock_fd, F_SETFL, flags | O_NONBLOCK) < 0) {
-      logger(LOG_ERROR, "listener_connection_handler()", "fcntl F_SETFL failed");
-      close(conn_sock_fd);
-      return;
-    }
+  // // Set the new connection socket to non-blocking
+  //   int flags = fcntl(conn_sock_fd, F_GETFL, 0);
+  //   if (flags < 0) {
+  //     logger(LOG_ERROR, "listener_connection_handler()", "fcntl F_GETFL failed");
+  //     close(conn_sock_fd);
+  //     return;
+  //   }
+  //   if (fcntl(conn_sock_fd, F_SETFL, flags | O_NONBLOCK) < 0) {
+  //     logger(LOG_ERROR, "listener_connection_handler()", "fcntl F_SETFL failed");
+  //     close(conn_sock_fd);
+  //     return;
+  //   }
 
   // Creating connection instance
   xps_connection_t *client = xps_connection_create(listener->core, conn_sock_fd); // Will be implemented later
