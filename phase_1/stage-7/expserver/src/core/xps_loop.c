@@ -219,6 +219,7 @@ void xps_loop_run(xps_loop_t *loop) {
             // }
 
             // 🟡 Above can be optimized using an RB tree
+            
             if (curr_event_idx == -1) {
                 logger(LOG_DEBUG, "handle_epoll_events()", "event not found. skipping");
                 continue;
