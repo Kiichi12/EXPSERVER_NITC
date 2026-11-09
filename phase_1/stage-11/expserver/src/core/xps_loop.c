@@ -237,7 +237,7 @@ bool handle_pipes(xps_loop_t *loop) {
             pipe->sink->handler_cb(pipe->sink);//call connection_sink_handler to read from pipe
         }
 
-        if (pipe->source && !pipe->sink) {
+        if (pipe->source && !pipe->sink && pipe->source->active) {
             pipe->source->active = false;
             pipe->source->close_cb(pipe->source);
         }
@@ -261,7 +261,7 @@ bool handle_pipes(xps_loop_t *loop) {
         if(pipe->sink && pipe->sink->ready && xps_pipe_is_readable(pipe)) {
             return true;
         }
-        if(pipe->source && !pipe->sink) {
+        if(pipe->source && !pipe->sink && pipe->source->active) {
             return true;
         }
         if(pipe->sink && !pipe->source && !xps_pipe_is_readable(pipe)) {
@@ -318,14 +318,14 @@ void handle_epoll_events(xps_loop_t *loop, int n_events) {
         }
 
         // Read
-        else if (curr_epoll_event.events & EPOLLIN) {
+        if (curr_epoll_event.events & EPOLLIN) {
             logger(LOG_DEBUG, "handle_epoll_events()", "EVENT / read");
             if (curr_event->read_cb != NULL)
                 curr_event->read_cb(curr_event->ptr);
         }
 
         // can arrive in the same event and the OUT edge would be lost otherwise)
-        else if (curr_epoll_event.events & EPOLLOUT) {
+        if (curr_epoll_event.events & EPOLLOUT) {
             logger(LOG_DEBUG, "handle_epoll_events()", "EVENT / write");
             if (curr_event->write_cb != NULL)
                 curr_event->write_cb(curr_event->ptr);

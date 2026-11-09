@@ -75,5 +75,6 @@ typedef void (*xps_handler_t)(void *ptr);
 #include "utils/xps_logger.h"
 #include "utils/xps_utils.h"
 #include "utils/xps_buffer.h"
+#include "network/xps_upstream.h"
 
 #endif

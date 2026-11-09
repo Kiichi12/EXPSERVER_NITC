@@ -114,21 +114,20 @@ void listener_connection_handler(void *ptr) {
     // Accepting connection
     int conn_sock_fd = accept(listener->sock_fd, &conn_addr, &conn_addr_len);
     if (conn_sock_fd < 0) {
-
-      // Check if it's a temporary error (EAGAIN/EWOULDBLOCK)
+      // Check if it's a temporary error
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
         logger(LOG_DEBUG, "listener_connection_handler()", "No pending connections (EAGAIN)");
         break;  // Just return, will be called again when there's data
       }
 
       // Check if the socket is invalid
-        if (errno == EBADF) {
-          logger(LOG_ERROR, "listener_connection_handler()", "Invalid socket fd: %d", 
-                  listener->sock_fd);
-          // The listener socket is invalid - destroy the listener
-          xps_listener_destroy(listener);
-          return;
-        }
+      if (errno == EBADF) {
+        logger(LOG_ERROR, "listener_connection_handler()", "Invalid socket fd: %d", 
+                listener->sock_fd);
+        // The listener socket is invalid - destroy the listener
+        xps_listener_destroy(listener);
+        return;
+      }
 
       perror("Error message");
       logger(LOG_ERROR, "listener_connection_handler()", "accept() failed: %s (errno: %d)", 
@@ -139,12 +138,12 @@ void listener_connection_handler(void *ptr) {
     // Set the new connection socket to non-blocking
     int flags = fcntl(conn_sock_fd, F_GETFL, 0);
     if (flags < 0) {
-      logger(LOG_ERROR, "listener_connection_handler()", "fcntl F_GETFL failed");
+      logger(LOG_ERROR, "listener_connection_handler()", "fcntl F_GETFL failed to make socket non-blocking");
       close(conn_sock_fd);
       return;
     }
     if (fcntl(conn_sock_fd, F_SETFL, flags | O_NONBLOCK) < 0) {
-      logger(LOG_ERROR, "listener_connection_handler()", "fcntl F_SETFL failed");
+      logger(LOG_ERROR, "listener_connection_handler()", "fcntl F_SETFL failed to make socket non-blocking");
       close(conn_sock_fd);
       return;
     }
@@ -158,35 +157,34 @@ void listener_connection_handler(void *ptr) {
     }
     client->listener = listener;
 
-    //Creates pipe for the connection created
-    xps_pipe_create(listener->core, DEFAULT_PIPE_BUFF_THRESH, client->source, client->sink);
+    if(listener->port == 8001){
+      // Reverse proxy: connect to upstream server
+      xps_connection_t *upstream = xps_upstream_create(listener->core, "127.0.0.1", 3000);
+      if (upstream == NULL) {
+        logger(LOG_ERROR, "listener_connection_handler()", "xps_upstream_create() failed");
+        xps_connection_destroy(client);
+        continue;
+      }
+
+      // client.source -> upstream.sink  (request)
+      xps_pipe_t *req_pipe = xps_pipe_create(listener->core, DEFAULT_PIPE_BUFF_THRESH, client->source, upstream->sink);
+      // upstream.source -> client.sink  (response)
+      xps_pipe_t *res_pipe = xps_pipe_create(listener->core, DEFAULT_PIPE_BUFF_THRESH, upstream->source, client->sink);
+
+      if (req_pipe == NULL || res_pipe == NULL) {
+        logger(LOG_ERROR, "listener_connection_handler()", "xps_pipe_create() failed");
+        xps_connection_destroy(upstream);
+        xps_connection_destroy(client);
+        continue;
+      }
+    }
+    else{
+      //Creates pipe for the connection created
+      xps_pipe_create(listener->core, DEFAULT_PIPE_BUFF_THRESH, client->source, client->sink);
+    }
+    
 
     logger(LOG_INFO, "xps_listener_connection_handler()", "new connection");
   }
 
 }
-// void xps_listener_connection_handler(xps_listener_t *listener) {
-//   assert(listener != NULL);
-
-//   struct sockaddr conn_addr;
-//   socklen_t conn_addr_len = sizeof(conn_addr);
-
-//   // Accepting connection
-//   int conn_sock_fd = accept(listener->sock_fd, &conn_addr, &conn_addr_len);
-//   if (conn_sock_fd < 0) {
-//     logger(LOG_ERROR, "xps_listener_connection_handler()", "accept() failed");
-//     perror("Error message");
-//     return;
-//   }
-
-//   // Creating connection instance
-//   xps_connection_t *client = xps_connection_create(listener->epoll_fd, conn_sock_fd); // Will be implemented later
-//   if (client == NULL) {
-//     logger(LOG_ERROR, "xps_listener_connection_handler()", "xps_connection_create() failed");
-//     close(conn_sock_fd);
-//     return;
-//   }
-//   client->listener = listener;
-
-//   logger(LOG_INFO, "xps_listener_connection_handler()", "new connection");
-// }
