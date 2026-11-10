@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eXpServer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
+      color: #e6e6f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      max-width: 640px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #6ee7b7, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+    }
+
+    .subtitle {
+      color: #a0a0b8;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(110, 231, 183, 0.1);
+      border: 1px solid rgba(110, 231, 183, 0.3);
+      color: #6ee7b7;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6ee7b7;
+      box-shadow: 0 0 8px #6ee7b7;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .links a {
+      color: #93c5fd;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(147, 197, 253, 0.3);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .links a:hover {
+      background: rgba(147, 197, 253, 0.1);
+      border-color: rgba(147, 197, 253, 0.6);
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.8rem;
+      color: #6b6b85;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>eXpServer</h1>
+    <p class="subtitle">A lightweight C web server</p>
+
+    <span class="status">Server is running</span>
+
+    <p>If you can see this page, your static file serving from the
+       <code>public/</code> directory is working correctly.</p>
+
+    <div class="links">
+      <a href="/redirect">/redirect</a>
+      <a href="/api">/api</a>
+      <a href="https://expserver.github.io" target="_blank" rel="noopener">
+        Documentation ↗
+      </a>
+    </div>
+
+    <footer>Served by eXpServer &mdash; Stage 16</footer>
+  </main>
+</body>
+</html>
